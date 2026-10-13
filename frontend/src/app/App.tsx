@@ -10,6 +10,8 @@ import { EmployeeDirectoryPage } from '../employees/EmployeeDirectoryPage'
 import { EmployeeFormPage } from '../employees/EmployeeFormPage'
 import { EmployeeDetailPage } from '../employees/EmployeeDetailPage'
 import { ReportsPage } from '../reports/ReportsPage'
+import { ImportUploadPage } from '../imports/ImportUploadPage'
+import { ImportPreviewPage } from '../imports/ImportPreviewPage'
 
 const signInSchema = z.object({
   email: z.string().trim().email('Enter a valid email address.').max(254),
@@ -136,10 +138,6 @@ function ProtectedLayout() {
   return <AppShell />
 }
 
-function PlaceholderPage({ title, description, icon: Icon }: { title: string; description: string; icon: typeof Users }) {
-  return <section className="page-placeholder"><div className="placeholder-icon"><Icon size={24} /></div><p className="eyebrow">SALARY MANAGEMENT</p><h1>{title}</h1><p>{description}</p><div className="placeholder-note"><CircleHelp size={16} /> This area will be added in the next approved UI spec.</div></section>
-}
-
 function NotFoundPage() {
   return <section className="page-placeholder"><div className="placeholder-icon"><CircleHelp size={24} /></div><h1>Page not found</h1><p>This page may have moved or the address may be incorrect.</p><Link className="button button-secondary" to="/employees">Go to employees</Link></section>
 }
@@ -153,8 +151,8 @@ export function App() {
       <Route path="employees/new" element={<EmployeeFormPage />} />
       <Route path="employees/:id" element={<EmployeeDetailPage />} />
       <Route path="reports" element={<ReportsPage />} />
-      <Route path="imports" element={<PlaceholderPage title="Import employees" description="Preview a CSV file before applying its changes." icon={FileUp} />} />
-      <Route path="imports/:id" element={<PlaceholderPage title="Import preview" description="Review proposed employee changes before commit." icon={FileUp} />} />
+      <Route path="imports" element={<ImportUploadPage />} />
+      <Route path="imports/:id" element={<ImportPreviewPage />} />
     </Route>
     <Route path="*" element={<NotFoundPage />} />
   </Routes>

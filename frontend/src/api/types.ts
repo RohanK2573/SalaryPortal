@@ -61,8 +61,18 @@ export type ImportRow = {
   rowNumber: number
   employeeCode: string
   action: 'CREATE' | 'UPDATE' | 'NO_OP' | 'INVALID'
+  fullName: string | null
+  countryCode: string | null
+  department: string | null
+  jobTitle: string | null
+  status: 'ACTIVE' | 'INACTIVE' | null
+  annualBaseAmount: string | null
+  currencyCode: string | null
+  effectiveDate: string | null
   errors: ApiFieldError[]
 }
+
+export type ImportDetails = { batch: ImportBatch; rows: ApiPage<ImportRow> }
 
 export function formatMoney(amount: string, currencyCode: string): string {
   const [integerPart, fractionPart] = amount.split('.')

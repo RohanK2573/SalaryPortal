@@ -17,7 +17,7 @@ function csrfToken(): string | undefined {
   }
 }
 
-export async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
+async function fetchResponse(path: string, init: RequestInit = {}): Promise<Response> {
   const method = (init.method ?? 'GET').toUpperCase()
   const headers = new Headers(init.headers)
   if (init.body && !(init.body instanceof FormData) && !headers.has('Content-Type')) {
@@ -38,7 +38,6 @@ export async function request<T>(path: string, init: RequestInit = {}): Promise<
   if (response.status === 401 && path !== '/api/v1/session') {
     window.dispatchEvent(new Event('salary:session-expired'))
   }
-  if (response.status === 204) return undefined as T
   if (!response.ok) {
     const body = (await response.json().catch(() => null)) as Partial<ApiProblem> | null
     const problem: ApiProblem = {
@@ -50,18 +49,39 @@ export async function request<T>(path: string, init: RequestInit = {}): Promise<
     }
     throw new ApiError(response.status, problem)
   }
+  return response
+}
+
+export async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
+  const response = await fetchResponse(path, init)
+  if (response.status === 204) return undefined as T
   if (response.headers.get('content-type')?.includes('application/json')) return response.json() as Promise<T>
   return (await response.blob()) as T
 }
 
 export const getSession = () => request<Session>('/api/v1/session')
 
-export async function downloadCsv(path: string, filename: string): Promise<void> {
-  const blob = await request<Blob>(path)
+function responseFilename(response: Response, fallback: string): string {
+  const disposition = response.headers.get('content-disposition') ?? ''
+  const encodedName = disposition.match(/filename\*=UTF-8''([^;]+)/i)?.[1]
+  const plainName = disposition.match(/filename="?([^";]+)"?/i)?.[1]
+  let filename = fallback
+  if (encodedName) {
+    try { filename = decodeURIComponent(encodedName) } catch { filename = encodedName }
+  } else if (plainName) filename = plainName
+  return filename.replace(/[\\/:*?"<>|\u0000-\u001f]/g, '_') || fallback
+}
+
+export async function downloadCsv(path: string, fallbackFilename: string): Promise<void> {
+  const response = await fetchResponse(path)
+  const blob = await response.blob()
   const url = URL.createObjectURL(blob)
   const anchor = document.createElement('a')
   anchor.href = url
-  anchor.download = filename
+  anchor.download = responseFilename(response, fallbackFilename)
+  anchor.hidden = true
+  document.body.append(anchor)
   anchor.click()
-  URL.revokeObjectURL(url)
+  anchor.remove()
+  window.setTimeout(() => URL.revokeObjectURL(url), 1000)
 }
