@@ -1,12 +1,13 @@
 # Salary Management Low-Level Design
 
-**Status:** Approved design baseline for feature specs  
+**Status:** Existing design baseline; reporting contract aligned with approved Spec-05
+
 **Product scope:** [Salary Management Requirements](./requirements.md)  
 **Primary user:** ACME HR manager
 
 ## 1. System architecture
 
-The application is a modular monolith. A React and TypeScript frontend is built as static assets and served by the Spring Boot application. Browser requests to `/api/v1` reach the same origin, avoiding cross-origin session configuration. Spring Boot owns authentication, validation, business rules, and persistence in PostgreSQL.
+The application is a modular monolith. A React and TypeScript frontend is built as static assets and served by the Spring Boot application. Browser requests to `/api/v1` reach the same origin, avoiding cross-origin session configuration. Spring Boot owns validation, business rules, and persistence in PostgreSQL. The implemented authentication module is an additional design choice; the assessment does not require authentication for its single HR manager.
 
 ```text
 Browser (React) -> Spring Boot controllers -> domain services -> repositories -> PostgreSQL
@@ -25,9 +26,9 @@ Backend modules are `auth`, `employees`, `salaries`, `imports`, and `reports`. C
 | `hr_user` | `id`, email, password hash, role, active flag | One seeded HR account; no public registration or additional role workflow. |
 | `import_batch` and `import_row` | owner, status, creation/expiry times, file hash, row number, normalized row, proposed action, errors, expected employee and latest-salary versions, result | Hold a reviewed CSV preview and make commit repeatable. Preview rows expire after 24 hours. |
 
-Employee codes are stable external identifiers. Country and currency use ISO codes, but the model does not assume every employee in a country is paid in the same currency. Salary changes may be effective in the past or today; future dates are rejected. The **current salary** is the record with the latest `effective_date` on or before the server's UTC date. A new dated record preserves history. Correcting a record on an existing date updates that record with optimistic locking and writes an audit event; deleting salary history is not supported.
+Employee codes are stable external identifiers. Country and currency use ISO codes, but the current API does not enforce a country-to-currency mapping. Seed data uses local currency; if a country contains multiple recorded currencies, reports keep them separate. Salary changes may be effective in the past or today; future dates are rejected. The **current salary** is the record with the latest `effective_date` on or before the server's UTC date. A new dated record preserves history. Correcting a record on an existing date updates that record with optimistic locking and writes an audit event; this history is an additional choice, not an assessment requirement.
 
-Reports include `ACTIVE` employees with a current salary. They group amounts by currency and never sum different currencies. Add indexes on employee code, employee search/filter fields, and (`employee_id`, `effective_date` descending). Migrations own schema changes; the seed script uses a fixed random seed and stable employee codes so reruns do not duplicate records.
+Reports include `ACTIVE` employees with a current salary; excluding inactive employees is our documented assumption. Required aggregates are minimum, maximum, and average by country, and average by country and job title. They group amounts by currency and never sum different currencies. Department, total, and median insights are secondary. Add indexes on employee code, employee search/filter fields, and (`employee_id`, `effective_date` descending). Migrations own schema changes; the seed script uses a fixed random seed and stable employee codes so reruns do not duplicate records.
 
 ## 3. API contract and behavior
 
@@ -41,7 +42,7 @@ All endpoints use `/api/v1`, JSON except CSV upload, and require an HR session u
 | `GET /employees/{id}/salary-records`, `POST /employees/{id}/salary-records` | Read dated history and append a past-or-today salary change. |
 | `PATCH /employees/{id}/salary-records/{recordId}` | Correct an existing record with its version and a reason; write an audit event. |
 | `POST /imports/preview`, `GET /imports/{id}`, `POST /imports/{id}/commit` | Upload and validate CSV, inspect the staged preview, and commit the entire batch atomically. |
-| `GET /reports/compensation` | Return current headcount, total, average, and median annual base salary, grouped by country or department and currency, with country/department filters. |
+| `GET /reports/compensation` | Return current headcount, minimum, maximum, and average annual base salary by country or country and job title, separated by currency. Country and department filters and secondary country/department, total, and median insights are specified in Spec-05. |
 
 Validation errors use a consistent problem response with field or CSV row errors. The API returns `401` for no session, `403` for denied access, `413` for an oversized upload, `422` for invalid input, `409` for a concurrent edit or stale import preview, and `410` for an expired preview. The UI preserves unsaved input and offers a clear retry or refresh action for recoverable failures.
 
@@ -53,18 +54,18 @@ The batch moves through `PREVIEWED -> COMMITTED` or `PREVIEWED -> EXPIRED`. Comm
 
 ## 4. Product experience and operations
 
-The frontend contains sign-in, overview, employee directory, employee detail and history, salary edit, import preview, and reporting views. Forms show currency and effective date explicitly. Imports show action counts and row errors before the commit button is enabled. Every view has loading, empty, and error states, keyboard-accessible controls, and responsive layouts. The browser requests paged data and server-generated aggregates rather than downloading all employees.
+The frontend puts employee search, current salary, salary editing, and the two required reporting questions first. Existing sign-in, salary history, import preview, and secondary insights appear in supporting flows. Forms show currency and effective date explicitly. Imports show action counts and row errors before the commit button is enabled. Every view has loading, empty, and error states, keyboard-accessible controls, and responsive layouts. The browser requests paged data and server-generated aggregates rather than downloading all employees.
 
 Spring Security manages the HR session with an `HttpOnly`, `SameSite=Lax` cookie that is also `Secure` over deployed HTTPS. Public `GET /session` initializes a readable CSRF token cookie; the UI sends that token in a request header for mutations, including sign-in. Passwords are hashed; credentials and database settings come from deployment secrets. Structured logs include request IDs and outcomes but exclude salary values, passwords, and CSV contents. A health endpoint checks application and database readiness. The deployable container includes the React build and Spring Boot API; PostgreSQL is persistent and backed up. Database migrations run on deployment.
 
 ## 5. Verification and delivery
 
-- **Unit tests:** current-salary selection across dated records, salary validation and correction, import row classification, and report calculations by currency.
+- **Unit tests:** current-salary selection across dated records, salary validation and correction, import row classification, and minimum/maximum/average report calculations by country, job title, and currency.
 - **API/database tests:** employee create and version conflict, salary audit events, invalid CSV rows, stale preview, atomic import failure, repeated commit, expired preview, and unauthorized access.
-- **Browser tests:** search and open an employee, record a salary change, preview and commit a CSV, and read a filtered report; include loading and error recovery checks.
+- **Browser tests:** search and open an employee, record a salary change, and answer both required report questions; cover optional CSV preview/commit and loading and error recovery states.
 - **Scale check:** seed 10,000 synthetic employees, confirm stable pagination and usable report response times, and inspect query plans for the indexed paths.
 - **Delivery:** deploy the application, provide setup instructions and a video demo, and keep incremental commits. Before implementing each feature, write a concise reviewed feature spec under `spec/`; record changes in `spec/ChangeLog.md`.
 
 ## Assumptions and tradeoffs
 
-Annual base salary is the only compensation component. Reports use current values, not historical organization-wide snapshots. Imports accept CSV, update existing employees by code, and never delete employees absent from a file. Payroll, tax, bonuses, conversion between currencies, free-form AI questions, native Excel upload, and multi-role approvals remain outside the first release. A single-origin modular monolith keeps deployment and authorization simple while leaving the modules separable if scale or product scope later requires it.
+Gross annual base salary is the only compensation component. Reports use current values, not historical organization-wide snapshots. The existing authentication, salary history/audit, and CSV import are additional choices; none is required by the clarification. Imports accept CSV, update existing employees by code, and never delete employees absent from a file. Payroll, bonuses, allowances, deductions, conversion between currencies, free-form AI questions, native Excel upload, and multi-role approvals remain outside the first release. A single-origin modular monolith keeps deployment and authorization simple while leaving the modules separable if scale or product scope later requires it.

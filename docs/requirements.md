@@ -1,35 +1,31 @@
 # Salary Management Requirements
 
-**Status:** Baseline scope for the assessment  
-**Source:** `Salary Management Assessment- Candidates.docx`  
-**Primary user:** ACME HR manager
+**Status:** Updated after assessment team clarification
 
-## Goal
+**Sources:** `Salary Management Assessment- Candidates.docx` and the assessment team's email clarification
 
-Replace spreadsheet-based salary management with a web application for an organization of 10,000 employees across multiple countries. The HR manager must be able to maintain salary data and answer common questions about how the organization pays people.
+**Primary user:** One ACME HR manager
 
-## Features in scope
+## Goal and required scope
 
-1. **Employee directory:** Search, sort, filter, and page through employees. Show employee ID, name, country, department, role, employment status, and current salary.
-2. **Salary management:** Create or update employees and record annual base salary in local currency with an effective date. Show previous salary records so a change does not erase history.
-3. **Spreadsheet intake:** Provide a CSV template and an import preview that identifies invalid rows and duplicate employee IDs before committing changes.
-4. **Pay reporting:** Show headcount, total annual base salary, average salary, and median salary by country and department, with filters and separate totals for each currency.
-5. **Access:** Restrict employee and salary data to an authenticated HR user. Use synthetic data for the assessment demo.
+Replace spreadsheet-based salary management with a usable web application for 10,000 employees across multiple countries. Seed employee data for the demo. The HR manager can manage employee records in the application, see each employee's **current gross annual base salary** in their local currency, and answer these questions:
 
-## Quality and delivery criteria
+1. What are the minimum, maximum, and average current salaries in a country?
+2. What is the average current salary for a job title within a country?
 
-- Build a functional UI and backend backed by a relational database. Seed 10,000 synthetic employees through a repeatable script; search and reports must remain usable at that scale.
-- Validate inputs on the server, use exact decimal values for money, and retain an audit trail of salary changes.
-- Include meaningful, fast, deterministic unit tests for core rules and tests for key API and import flows. Keep the code readable and maintainable.
-- Deploy the application, record a video demo, and provide setup instructions and relevant design notes. Make incremental Git commits that show the solution's evolution.
+Bonuses, allowances, deductions, payroll, and currency conversion are outside the requested scope. Excel import and export, salary history, and authentication are not required by the assessment clarification.
 
-## Deliberately excluded
+## Delivery and quality
 
-- **Payroll payments, taxes, bonuses, equity, and benefits:** Their business rules are not defined in the assessment; annual base salary provides a complete core workflow.
-- **Currency conversion:** No exchange-rate source or date policy is specified. Reports will not add amounts from different currencies together.
-- **Open-ended AI questions:** Defined, filterable reports provide answers whose calculations can be checked.
-- **Native Excel upload and multi-role approvals:** CSV intake and one HR role keep the first release focused while covering the primary user journey.
+Provide a functional frontend and backend backed by a relational database, seed 10,000 synthetic employees, keep the employee and report views usable at that scale, include meaningful deterministic tests, deploy the application, document setup and assumptions, record a video demo, and make incremental Git commits.
 
-## Assumptions to revisit if clarified
+## Additional choices already built
 
-The assessment does not prescribe salary components, report metrics, import format, exchange-rate policy, or access roles. The choices above are our proposed product scope, not additional requirements imposed by the assessment.
+- **Dated salary records and audit events:** Preserve changes and corrections while displaying the latest eligible record as current salary. This adds storage and workflow complexity; organization-wide historical reporting is not planned.
+- **Single HR account and session authentication:** Protect salary data in the deployed demo. Registration and multiple roles are not planned; authentication is an implementation choice, not an assessment requirement.
+- **CSV preview and import:** Support spreadsheet-based data entry with validation before commit. The required 10,000-employee demo dataset still comes from a repeatable seed; Excel file support is not planned.
+- **Department, total, and median insights:** Useful secondary context for HR. The two requested report questions take priority in the UI, API, and demo.
+
+## Assumptions and trade-offs
+
+Reports use current salary for `ACTIVE` employees with a salary record; inactive employees remain searchable. Country and country–job-title monetary results are separated by currency, even within one country, because adding different currencies would be misleading. Seed data uses each employee's local currency. The current API validates ISO currency codes but does not enforce a country-to-currency mapping, so manual entry can create a different currency within a country; the UI must show currency and the reports must keep such amounts separate. No exchange rates or converted global totals are provided.
