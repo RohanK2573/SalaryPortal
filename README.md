@@ -10,6 +10,14 @@ Salary management assessment application built with Java 21, Spring Boot, Maven,
 
 The app listens on port 8080. Compose uses local development credentials only; do not reuse them outside a local machine. PostgreSQL data persists in the `salary_management_postgres_data` volume. `docker compose down` stops the containers; `docker compose down -v` also deletes that local database volume.
 
+## Frontend development
+
+The React and TypeScript UI lives in `frontend/`. With the backend running on port 8080, start the development server with `cd frontend && npm install && npm run dev`; Vite serves the UI and proxies `/api` requests to Spring Boot. Build the production UI with `cd frontend && npm run build`. The integrated container build is covered by the final UI delivery spec.
+
+## Frontend development
+
+The React and TypeScript UI lives in `frontend/`. With the backend running on port 8080, start the development server with `cd frontend && npm install && npm run dev`; Vite serves the UI and proxies `/api` requests to Spring Boot. Build the production UI with `cd frontend && npm run build`. The integrated container build is covered by the final UI delivery spec.
+
 For IntelliJ or Maven startup outside Docker Compose, start only PostgreSQL with `docker compose up -d postgres`, then set `DATABASE_URL=jdbc:postgresql://localhost:5433/salary_management`, `DATABASE_USERNAME=salary_app`, and `DATABASE_PASSWORD=local_dev_password` in the run configuration. Flyway applies migrations at startup and Hibernate validates the schema.
 
 ## Demo seed

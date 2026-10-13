@@ -27,3 +27,11 @@
 - Refined draft Spec-06 with an opt-in, deterministic 10,000-employee seed contract; explicit database readiness behavior; backend container and deployment responsibilities; and a repeatable scale-check method for employee pages and the two required reports.
 - Simplified draft Spec-06 to keep the required seed, deployment, readiness, and 10,000-employee usability checks while removing prescriptive seed IDs, timing runs, and backup implementation gates.
 - Approved Spec-06 and implemented the opt-in deterministic demo seed, database-aware readiness probe, backend container image, and local Compose run path with setup documentation.
+- Added draft Spec-07 for the React/TypeScript foundation, custom design system, routing, shared API client, CSRF-aware session flow, accessibility, and responsive application shell.
+- Added draft Spec-08 for the employee directory, employee creation and profile editing, current salary presentation, salary history, and conflict-safe salary maintenance.
+- Added draft Spec-09 for the two required compensation-reporting questions, exact currency-separated cards and tables, URL-backed filters, and secondary department insights.
+- Added draft Spec-10 for the supporting CSV template, upload, preview, row-error, confirmation, idempotent commit, and stale/expired preview experience.
+- Added draft Spec-11 for single-origin UI packaging, SPA routing and security integration, 10,000-employee verification, accessibility, browser checks, and delivery documentation.
+- Approved Spec-07 and started the React/TypeScript frontend foundation with session-aware routing, shared API handling, and the HR application shell.
+- Added the initial Vite/React frontend, typed API contracts and error client, CSRF-aware session provider, responsive sign-in and navigation shell, shared accessible UI primitives, and frontend development instructions.
+- Added the initial Vite/React frontend, typed API contracts and error client, CSRF-aware session provider, responsive sign-in and navigation shell, shared accessible UI primitives, and frontend development instructions.
