@@ -17,5 +17,7 @@ FROM eclipse-temurin:21-jre
 WORKDIR /app
 COPY --from=build --chown=10001:10001 /workspace/target/salary-management-*.jar /app/app.jar
 USER 10001:10001
-EXPOSE 8080
-ENTRYPOINT ["java", "-XX:MaxRAMPercentage=75.0", "-jar", "/app/app.jar"]
+COPY --chown=10001:10001 deploy/render-entrypoint.sh /app/render-entrypoint.sh
+RUN chmod 0555 /app/render-entrypoint.sh
+EXPOSE 10000
+ENTRYPOINT ["/app/render-entrypoint.sh"]

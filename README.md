@@ -51,7 +51,7 @@ The Maven build includes `frontend/dist` in the JAR under `static/`. The Docker 
 
 ## Runtime and deployment
 
-The container runs as a non-root user and listens on port 8080. Configure these values in the hosting environment or secret manager; do not commit production secrets.
+The container runs as a non-root user and binds to `0.0.0.0`. It listens on the platform-provided `PORT` when present and defaults to port 8080 for local runs. Configure these values in the hosting environment or secret manager; do not commit production secrets.
 
 | Variable | Purpose |
 | --- | --- |
@@ -64,6 +64,8 @@ The container runs as a non-root user and listens on port 8080. Configure these 
 | `TRUSTED_PROXY_ADDRESSES` | Trusted ingress socket IPs for forwarded client IP handling |
 
 Deploy one application container with a persistent PostgreSQL service. Configure HTTPS at the hosting ingress and set `SESSION_COOKIE_SECURE=true`. The hosting provider or platform owner must configure database backups, retention, encryption, and a tested restore procedure; document the selected provider's instructions in its deployment runbook.
+
+For Render's Docker deployment, follow [the Render deployment guide](docs/render-deployment.md) to create the services in the dashboard.
 
 Flyway applies database migrations during startup and Hibernate validates the schema. Readiness at `/actuator/health/readiness` includes PostgreSQL; liveness is `/actuator/health/liveness`. Health details are hidden.
 
