@@ -9,3 +9,6 @@
 - Added a project `.gitignore` for build output, local environment secrets, and machine-specific files.
 - Marked the backend foundation spec approved and started its implementation.
 - Implemented the Spring Boot/Maven application skeleton, required PostgreSQL configuration, Flyway migration baseline, shared problem responses, one-based pagination, UTC clock, request IDs, and focused unit tests for the shared conventions.
+- Refined the draft HR authentication spec with the single-account bootstrap behavior, 30-minute idle timeout, CSRF refresh and sign-out rules, non-cacheable responses, and sign-in rate limiting.
+- Marked the HR authentication spec approved and started its implementation.
+- Added the HR account schema and bootstrap, password authentication, server-side session endpoints, CSRF protection, protected API routing, client IP rate limiting, and authentication unit tests.
