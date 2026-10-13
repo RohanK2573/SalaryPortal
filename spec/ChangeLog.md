@@ -34,4 +34,7 @@
 - Added draft Spec-11 for single-origin UI packaging, SPA routing and security integration, 10,000-employee verification, accessibility, browser checks, and delivery documentation.
 - Approved Spec-07 and started the React/TypeScript frontend foundation with session-aware routing, shared API handling, and the HR application shell.
 - Added the initial Vite/React frontend, typed API contracts and error client, CSRF-aware session provider, responsive sign-in and navigation shell, shared accessible UI primitives, and frontend development instructions.
-- Added the initial Vite/React frontend, typed API contracts and error client, CSRF-aware session provider, responsive sign-in and navigation shell, shared accessible UI primitives, and frontend development instructions.
+- Approved Spec-08 and started employee directory, creation, profile editing, salary history, and salary maintenance UI implementation.
+- Implemented the employee directory with server-side search, filters, sorting, URL-backed pagination, responsive table/cards, and loading/error/empty states. Added employee creation, profile editing with version conflict recovery, current salary display, paginated salary history, salary creation, and audited salary corrections.
+- Added exact decimal/date validation, backend field-error mapping, duplicate/conflict guidance, draft-preserving refresh flows, and responsive accessible employee forms and dialogs. Wired employee routes into the authenticated application shell.
+- Verified the frontend with `npm run typecheck` and `npm run build`.

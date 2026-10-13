@@ -43,7 +43,7 @@ export function Dialog({ open, title, description, onClose, children }: PropsWit
     if (!open && dialog.open) dialog.close()
   }, [open])
 
-  return <dialog ref={dialogRef} className="dialog" aria-labelledby={titleId} aria-describedby={descriptionId} onCancel={(event) => { event.preventDefault(); onClose() }} onClose={onClose}>
+  return <dialog ref={dialogRef} className="dialog" aria-labelledby={titleId} aria-describedby={descriptionId} onCancel={(event) => { event.preventDefault(); onClose() }}>
     <div className="dialog-heading"><div><h2 id={titleId}>{title}</h2>{description && <p id={descriptionId}>{description}</p>}</div><button className="icon-button" type="button" aria-label="Close dialog" onClick={onClose}><X size={19} /></button></div>
     <div className="dialog-content">{children}</div>
   </dialog>

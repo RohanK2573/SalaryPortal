@@ -6,6 +6,9 @@ import { ArrowRight, BadgeDollarSign, BriefcaseBusiness, CircleHelp, FileUp, Loc
 import { Link, Navigate, NavLink, Outlet, Route, Routes, useLocation, useNavigate } from 'react-router-dom'
 import { ApiError } from '../api/client'
 import { useAuth } from '../auth/AuthProvider'
+import { EmployeeDirectoryPage } from '../employees/EmployeeDirectoryPage'
+import { EmployeeFormPage } from '../employees/EmployeeFormPage'
+import { EmployeeDetailPage } from '../employees/EmployeeDetailPage'
 
 const signInSchema = z.object({
   email: z.string().trim().email('Enter a valid email address.').max(254),
@@ -145,9 +148,9 @@ export function App() {
     <Route path="/signin" element={<SignInPage />} />
     <Route element={<ProtectedLayout />}>
       <Route index element={<Navigate to="/employees" replace />} />
-      <Route path="employees" element={<PlaceholderPage title="Employees" description="Find and manage employee profiles and current salary." icon={Users} />} />
-      <Route path="employees/new" element={<PlaceholderPage title="New employee" description="Add an employee and their initial salary." icon={Users} />} />
-      <Route path="employees/:id" element={<PlaceholderPage title="Employee details" description="Review profile details and salary information." icon={Users} />} />
+      <Route path="employees" element={<EmployeeDirectoryPage />} />
+      <Route path="employees/new" element={<EmployeeFormPage />} />
+      <Route path="employees/:id" element={<EmployeeDetailPage />} />
       <Route path="reports" element={<PlaceholderPage title="Compensation reports" description="Review current salary insights by country and job title." icon={BriefcaseBusiness} />} />
       <Route path="imports" element={<PlaceholderPage title="Import employees" description="Preview a CSV file before applying its changes." icon={FileUp} />} />
       <Route path="imports/:id" element={<PlaceholderPage title="Import preview" description="Review proposed employee changes before commit." icon={FileUp} />} />
