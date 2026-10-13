@@ -1,6 +1,6 @@
 # Backend Foundation Spec
 
-**Status:** Draft for review  
+**Status:** Approved
 **Depends on:** [Requirements](../docs/requirements.md) and [LLD](../docs/low-level-design.md)
 
 ## Why and what

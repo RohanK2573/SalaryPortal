@@ -4,7 +4,7 @@ Review and approve these specs in order before implementing backend features. Sh
 
 | Order | Spec | Purpose | Depends on |
 | --- | --- | --- | --- |
-| 1 | [Backend Foundation](./specs-01-backend-foundation.md) | Application structure, database migrations, API conventions, and test setup. | Requirements and LLD |
+| 1 | [Backend Foundation](./specs-01-backend-foundation.md) | Application structure, database migrations, API conventions, and test setup. | Requirements and LLD (approved) |
 | 2 | [HR Authentication](./specs-02-hr-authentication.md) | Seeded HR account, sessions, access control, and CSRF. | Backend Foundation |
 | 3 | [Employee and Salary Management](./specs-03-employee-salary-management.md) | Employee directory, profile edits, salary history, and audit events. | Foundation and Authentication |
 | 4 | [CSV Import](./specs-04-csv-import.md) | Staged preview and atomic import of employee and salary data. | Employee and Salary Management |

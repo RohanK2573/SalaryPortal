@@ -7,3 +7,5 @@
 - Added six draft backend feature specs covering foundation, HR access, employee and salary management, CSV import, compensation reporting, and seed/deployment readiness. Clarified public session bootstrap and CSRF handling in the LLD.
 - Numbered backend spec filenames by implementation order and added this index for dependency navigation.
 - Added a project `.gitignore` for build output, local environment secrets, and machine-specific files.
+- Marked the backend foundation spec approved and started its implementation.
+- Implemented the Spring Boot/Maven application skeleton, required PostgreSQL configuration, Flyway migration baseline, shared problem responses, one-based pagination, UTC clock, request IDs, and focused unit tests for the shared conventions.
