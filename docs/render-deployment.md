@@ -76,4 +76,4 @@ The bootstrap creates the initial HR account if none exists. On restarts it leav
 
 ## Local Docker behavior
 
-The Docker entrypoint converts Render's `postgresql://` connection string to the JDBC URL expected by Spring. Local Compose already supplies `jdbc:postgresql://`, so its URL remains unchanged. The app listens on Render's `PORT` when provided and defaults to port 8080 for local runs.
+The Docker entrypoint removes the username and password from Render's `postgresql://` URL, then converts the remaining host/database URL to JDBC form. The app uses `DATABASE_USERNAME` and `DATABASE_PASSWORD` separately. Local Compose already supplies `jdbc:postgresql://`, so its URL remains unchanged. The app listens on Render's `PORT` when provided and defaults to port 8080 for local runs.
