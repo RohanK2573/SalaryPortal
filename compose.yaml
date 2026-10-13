@@ -1,0 +1,20 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: salary-management-postgres
+    environment:
+      POSTGRES_DB: salary_management
+      POSTGRES_USER: salary_app
+      POSTGRES_PASSWORD: local_dev_password
+    ports:
+      - "5433:5432"
+    volumes:
+      - salary_management_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U salary_app -d salary_management"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  salary_management_postgres_data:

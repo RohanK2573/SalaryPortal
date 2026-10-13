@@ -1,11 +1,16 @@
 package com.incubyte.salarymanagement.api;
 
-import java.net.URI;
 import java.util.List;
+import com.incubyte.salarymanagement.api.ApiException;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
@@ -30,6 +35,22 @@ public class ApiExceptionHandler {
                 ? "The request contains invalid values."
                 : "The request could not be completed.";
         return problem(status, detail, List.of());
+    }
+
+    @ExceptionHandler(ApiException.class)
+    ResponseEntity<ApiProblem> apiFailure(ApiException exception) {
+        return problem(exception.status(), exception.getMessage(), exception.errors());
+    }
+
+    @ExceptionHandler({DataIntegrityViolationException.class, OptimisticLockingFailureException.class})
+    ResponseEntity<ApiProblem> persistenceConflict(Exception exception) {
+        return problem(HttpStatus.CONFLICT, "The data changed or conflicts with an existing record. Retry after refreshing.", List.of());
+    }
+
+    @ExceptionHandler({MethodArgumentTypeMismatchException.class, MissingServletRequestParameterException.class,
+            HttpMessageNotReadableException.class})
+    ResponseEntity<ApiProblem> malformedRequest(Exception exception) {
+        return problem(HttpStatus.UNPROCESSABLE_ENTITY, "The request contains invalid values.", List.of());
     }
 
     @ExceptionHandler(Exception.class)

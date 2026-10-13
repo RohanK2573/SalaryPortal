@@ -4,9 +4,18 @@ Backend foundation for the salary management assessment. The application uses Ja
 
 ## Local setup
 
-1. Start a PostgreSQL database.
-2. Set `DATABASE_URL` (for example, `jdbc:postgresql://localhost:5432/salary_management`), `DATABASE_USERNAME`, and `DATABASE_PASSWORD` in your shell.
-3. Run `mvn spring-boot:run` (or `mvn test` to run the unit tests).
+1. Start the local PostgreSQL database with `docker compose up -d postgres` and wait until it is healthy with `docker compose ps`.
+2. Set the application connection settings in your shell:
+
+   ```sh
+   export DATABASE_URL=jdbc:postgresql://localhost:5433/salary_management
+   export DATABASE_USERNAME=salary_app
+   export DATABASE_PASSWORD=local_dev_password
+   ```
+
+3. Run `mvn spring-boot:run`. Flyway applies the migrations and Hibernate validates the schema. Use `mvn test` to run the unit tests.
+
+The Compose credentials are for local development only. Do not reuse them outside a local machine. The database data is kept in the `salary_management_postgres_data` Docker volume; stop the service with `docker compose down` and remove its local data with `docker compose down -v`.
 
 The service listens on port 8080. Health and readiness probes are available under `/actuator/health`. Flyway runs migrations at startup; Hibernate validates the schema. No database credentials are committed to the repository.
 

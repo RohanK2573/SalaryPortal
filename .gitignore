@@ -12,6 +12,7 @@ dist/
 .env
 .env.*
 !.env.example
+/application-local.properties
 
 # Local tooling and operating system files
 .idea/
