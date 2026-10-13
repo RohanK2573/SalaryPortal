@@ -41,6 +41,11 @@
 - Approved Spec-09 and started the currency-separated compensation reporting UI.
 - Implemented country, country/job-title, and expandable department salary reports using backend aggregates. Added URL-backed view and filters, per-currency summary cards and tables, exact decimal formatting, active/current-salary scope guidance, and responsive loading, error, empty, and updating states.
 - Wired the reports route into the authenticated shell and verified the frontend with `npm run typecheck` and `npm run build`.
+- Approved Spec-11 and started single-origin packaging, SPA routing, and integrated delivery documentation.
+- Packaged the Vite production assets in the Spring Boot JAR and added explicit SPA forwarding for supported browser routes. Public static paths remain separate from protected APIs; missing asset and API paths do not fall back to the UI.
+- Added a Node frontend build stage and backend test/package stage to the non-root Docker image. Documented repeatable setup, seed/bootstrap, runtime secrets, HTTPS termination, persistent database and host-owned backups, readiness, demo steps, and the 10,000-employee measurement procedure.
+- Added SPA route-forwarding tests. Frontend `npm ci`, type check, and production build pass; all 16 Maven tests pass and the runnable JAR contains the built index and hashed assets. Container startup, browser/accessibility checks, and scale timings remain pending because Docker daemon access is denied in this environment.
+- Fixed non-web bootstrap and seed commands by creating the HTTP security filter chain only in servlet applications; one-off CLI runs can now execute without an `HttpSecurity` bean.
 - Approved Spec-10 and started the CSV template, preview, and atomic commit UI.
 - Implemented server-template download, CSV file checks and multipart preview, paginated normalized row review with field errors, explicit atomic commit confirmation, saved committed results, and recovery paths for invalid, stale, expired, unknown, and uncertain batches.
 - Added import-specific API contracts and responsive upload, preview, status, and commit views; wired both import routes into the authenticated shell. Verified the frontend with `npm run typecheck` and `npm run build`.

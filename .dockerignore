@@ -1,11 +1,14 @@
 .git
 .idea
+.env.example
 .env
 .env.*
 application-local.properties
 target
 node_modules
+frontend/node_modules
 dist
+frontend/dist
 .next
 *.docx
 *.log

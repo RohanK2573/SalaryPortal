@@ -4,6 +4,7 @@ import com.incubyte.salarymanagement.api.ApiProblem;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.List;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -66,6 +67,7 @@ public class SecurityConfiguration {
     }
 
     @Bean
+    @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
     SecurityFilterChain securityFilterChain(HttpSecurity http, CsrfTokenRepository csrfTokenRepository,
             SecurityContextRepository securityContextRepository, ObjectMapper objectMapper) throws Exception {
         http
@@ -77,6 +79,10 @@ public class SecurityConfiguration {
                         .sessionFixation(fixation -> fixation.changeSessionId()))
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/api/v1/session", "/actuator/health/**").permitAll()
+                        .requestMatchers("/", "/signin", "/employees", "/employees/new", "/employees/*",
+                                "/reports", "/imports", "/imports/*", "/index.html", "/assets/**",
+                                "/favicon.ico", "/robots.txt")
+                        .permitAll()
                         .requestMatchers("/api/v1/**").authenticated()
                         .anyRequest().denyAll())
                 .exceptionHandling(errors -> errors

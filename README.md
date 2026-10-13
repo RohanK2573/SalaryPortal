@@ -1,55 +1,98 @@
 # Salary Management
 
-Salary management assessment application built with Java 21, Spring Boot, Maven, and PostgreSQL.
+A salary management assessment application. The React UI and Spring Boot API are packaged together and share one origin. PostgreSQL stores employee data, salary history, import previews, and audit events.
 
-## Local setup with Docker Compose
+## Start a local demo
 
-1. Start the app and PostgreSQL: `docker compose up --build -d app`.
-2. Check startup and readiness: `docker compose ps` and `curl -i http://localhost:8080/actuator/health/readiness`.
-3. Run the backend tests with `mvn test` (Java 21 and Maven required).
-
-The app listens on port 8080. Compose uses local development credentials only; do not reuse them outside a local machine. PostgreSQL data persists in the `salary_management_postgres_data` volume. `docker compose down` stops the containers; `docker compose down -v` also deletes that local database volume.
-
-## Frontend development
-
-The React and TypeScript UI lives in `frontend/`. With the backend running on port 8080, start the development server with `cd frontend && npm install && npm run dev`; Vite serves the UI and proxies `/api` requests to Spring Boot. Build the production UI with `cd frontend && npm run build`. The integrated container build is covered by the final UI delivery spec.
-
-## Frontend development
-
-The React and TypeScript UI lives in `frontend/`. With the backend running on port 8080, start the development server with `cd frontend && npm install && npm run dev`; Vite serves the UI and proxies `/api` requests to Spring Boot. Build the production UI with `cd frontend && npm run build`. The integrated container build is covered by the final UI delivery spec.
-
-For IntelliJ or Maven startup outside Docker Compose, start only PostgreSQL with `docker compose up -d postgres`, then set `DATABASE_URL=jdbc:postgresql://localhost:5433/salary_management`, `DATABASE_USERNAME=salary_app`, and `DATABASE_PASSWORD=local_dev_password` in the run configuration. Flyway applies migrations at startup and Hibernate validates the schema.
-
-## Demo seed
-
-Seeding is opt-in. After starting Compose, run:
+Requirements: Docker Desktop installed and running.
 
 ```sh
-docker compose run --rm app --spring.main.web-application-type=none --app.demo-seed.enabled=true
-```
-
-On a clean database this creates 10,000 deterministic synthetic employees and current salary records. Reruns do not duplicate or overwrite records. Existing non-demo employees are preserved; a conflicting `DEMO-` employee code makes the command fail without replacing that employee.
-
-## Bootstrap the HR account
-
-Set `HR_INITIAL_EMAIL` and `HR_INITIAL_PASSWORD` from local environment variables or deployment secrets, then run:
-
-```sh
+cp .env.example .env
+docker compose build app
+docker compose up -d postgres
 docker compose run --rm app --spring.main.web-application-type=none --app.bootstrap.hr-user.enabled=true
+# Optional: load the 10,000 demo employees.
+docker compose run --rm app --spring.main.web-application-type=none --app.demo-seed.enabled=true
+docker compose up -d app
 ```
 
-Bootstrap is disabled by default. Repeating it with the same normalized email keeps the existing password; a different email fails rather than creating another account. Do not store the credentials in source files or pass them as command-line arguments.
+Set `HR_INITIAL_EMAIL` and `HR_INITIAL_PASSWORD` in `.env` before running bootstrap. Open `http://localhost:8080/signin` and sign in with those values. The example values are for local development only.
 
-The session API is `GET`, `POST`, and `DELETE /api/v1/session`. The UI first calls `GET` to receive the CSRF cookie, sends its value as `X-XSRF-TOKEN` on sign-in and other mutations, then calls `GET` again after sign-in to obtain a fresh token. Authenticated API responses use `Cache-Control: no-store`. Set `SESSION_COOKIE_SECURE=true` in deployed HTTPS environments; local HTTP development defaults to `false`.
+To include the 10,000 synthetic demo employees and salary records, first start PostgreSQL and then run the seed command below. This takes longer; without seeding, the app starts with an empty database and you can add employees through the UI.
 
-Sign-in is limited to 10 attempts per five minutes per client IP. If the app is behind a trusted ingress, set `TRUSTED_PROXY_ADDRESSES` to its comma-separated socket IP addresses; the ingress must replace `X-Forwarded-For` with the original client address. Forwarded headers from any other source are ignored.
+Compose builds the app and UI, starts PostgreSQL, and waits for database readiness. PostgreSQL runs on port 5433 and its data persists in the `salary_management_postgres_data` volume. Stop the services with `docker compose down`; remove the local database too with `docker compose down -v`.
 
-## Backend image and deployment
+## Development
 
-Build the backend image with `docker build -t salary-management:local .`. Configure `DATABASE_URL`, `DATABASE_USERNAME`, and `DATABASE_PASSWORD` in the deployment environment. Keep PostgreSQL persistent and set `SESSION_COOKIE_SECURE=true` when HTTPS terminates at the hosting ingress. Configure database backups through the chosen host and document its restore procedure. The final single-origin image will also include the React build after the frontend stage.
+Requirements: Java 21, Maven, Node.js 22 or newer, and npm.
 
-`/actuator/health/liveness` checks whether the process is alive. `/actuator/health/readiness` also checks PostgreSQL and returns unhealthy when the database is unavailable. Health details are hidden. Flyway migration failures prevent the service from starting.
+For the Vite development server, start PostgreSQL and the backend, then run:
 
-## Backend module layout
+```sh
+cd frontend
+npm ci
+npm run dev
+```
 
-Feature code belongs in `auth`, `employees`, `salaries`, `imports`, and `reports` packages under `com.incubyte.salarymanagement`. Shared HTTP contracts live under `api`; cross-cutting configuration and observability have their own packages.
+Vite serves the UI and proxies `/api` and `/actuator` to `http://localhost:8080`.
+
+To build the integrated JAR from a clean checkout:
+
+```sh
+cd frontend
+npm ci
+npm run typecheck
+npm run build
+cd ..
+mvn clean test package
+```
+
+The Maven build includes `frontend/dist` in the JAR under `static/`. The Docker build runs the same frontend and backend build steps.
+
+## Runtime and deployment
+
+The container runs as a non-root user and listens on port 8080. Configure these values in the hosting environment or secret manager; do not commit production secrets.
+
+| Variable | Purpose |
+| --- | --- |
+| `DATABASE_URL` | PostgreSQL JDBC URL |
+| `DATABASE_USERNAME` | Application database user |
+| `DATABASE_PASSWORD` | Application database password |
+| `SESSION_COOKIE_SECURE` | Set to `true` when HTTPS terminates at the hosting ingress |
+| `HR_INITIAL_EMAIL` | Initial HR account email, used during bootstrap |
+| `HR_INITIAL_PASSWORD` | Initial HR account password, used during bootstrap |
+| `TRUSTED_PROXY_ADDRESSES` | Trusted ingress socket IPs for forwarded client IP handling |
+
+Deploy one application container with a persistent PostgreSQL service. Configure HTTPS at the hosting ingress and set `SESSION_COOKIE_SECURE=true`. The hosting provider or platform owner must configure database backups, retention, encryption, and a tested restore procedure; document the selected provider's instructions in its deployment runbook.
+
+Flyway applies database migrations during startup and Hibernate validates the schema. Readiness at `/actuator/health/readiness` includes PostgreSQL; liveness is `/actuator/health/liveness`. Health details are hidden.
+
+The browser and API share one origin. Session cookies are HTTP-only and use `SameSite=Lax`; the browser returns the readable CSRF cookie in the `X-XSRF-TOKEN` header for mutations. CORS is not needed.
+
+## 10,000-employee scale check
+
+With the 10,000 employee seed loaded and an authenticated HR session, measure these API requests and record machine/container CPU and memory, PostgreSQL version, application build, and observed times. No machine-specific latency threshold is required; inspect query plans if a path looks slow.
+
+- Employee page 1: `/api/v1/employees?page=1&size=25&sort=employeeCode,asc`
+- Employee page 400: `/api/v1/employees?page=400&size=25&sort=employeeCode,asc`
+- Country report: `/api/v1/reports/compensation?groupBy=country`
+- Country/job-title report: `/api/v1/reports/compensation?groupBy=countryJobTitle&countryCode=IN`
+
+Record measured results in the delivery notes for the environment used. This repository does not include fabricated timings.
+
+## Demo checklist
+
+- Sign in and sign out; anonymous employee API calls return `401`.
+- Search an employee, open details, create an employee, and edit a profile.
+- Add a dated salary and confirm current salary and history refresh.
+- Review country salary minimum, maximum, and average, then average salary by job title within a country. Confirm currencies remain separate.
+- Download the CSV template, preview a small file, inspect its rows, and commit it.
+- Refresh `/employees`, `/employees/new`, `/employees/{id}`, `/reports`, `/imports`, and `/imports/{id}` directly.
+- Check keyboard focus, dialogs, navigation, and responsive layouts at mobile, tablet, and desktop widths.
+
+## Repository contents
+
+- `src/`: Spring Boot API, migrations, authentication, seed, and health configuration.
+- `frontend/`: React/TypeScript UI and committed npm lockfile.
+- `spec/`: ordered implementation specifications and changelog.
+- `docs/`: requirements and system designs.
