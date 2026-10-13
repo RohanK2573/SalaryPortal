@@ -50,7 +50,7 @@ public class SalaryService {
     @Transactional
     public SalaryResponse create(UUID employeeId, String rawAmount, String rawCurrency, String rawDate,
             String actorEmail) {
-        Employee employee = employees.findById(employeeId)
+        Employee employee = employees.findLockedById(employeeId)
                 .orElseThrow(() -> ApiException.notFound("Employee was not found."));
         var amount = rules.amount(rawAmount);
         String currency = rules.currencyCode(rawCurrency);
@@ -78,6 +78,8 @@ public class SalaryService {
         String reason = requiredText("reason", patch.get("reason"), 500);
         if (patch.size() < 3) throw ApiException.invalid("body", "At least one salary field is required.");
 
+        employees.findLockedById(employeeId)
+                .orElseThrow(() -> ApiException.notFound("Employee was not found."));
         SalaryRecord record = records.findForEmployee(employeeId, recordId)
                 .orElseThrow(() -> ApiException.notFound("Salary record was not found for this employee."));
         if (record.getVersion() != versionNode.longValue()) {

@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 @RestControllerAdvice
 public class ApiExceptionHandler {
@@ -51,6 +52,11 @@ public class ApiExceptionHandler {
             HttpMessageNotReadableException.class})
     ResponseEntity<ApiProblem> malformedRequest(Exception exception) {
         return problem(HttpStatus.UNPROCESSABLE_ENTITY, "The request contains invalid values.", List.of());
+    }
+
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    ResponseEntity<ApiProblem> uploadTooLarge(MaxUploadSizeExceededException exception) {
+        return problem(HttpStatus.PAYLOAD_TOO_LARGE, "Uploaded file exceeds the 10 MiB limit.", List.of());
     }
 
     @ExceptionHandler(Exception.class)

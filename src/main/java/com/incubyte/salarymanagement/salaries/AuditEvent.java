@@ -18,6 +18,8 @@ public class AuditEvent {
     private UUID employeeId;
     @Column(name = "salary_record_id", nullable = false)
     private UUID salaryRecordId;
+    @Column(name = "import_batch_id")
+    private UUID importBatchId;
     @Column(name = "actor_email", nullable = false, length = 254)
     private String actorEmail;
     @Column(name = "event_type", nullable = false, length = 32)
@@ -43,15 +45,16 @@ public class AuditEvent {
 
     protected AuditEvent() {}
 
-    private AuditEvent(UUID employeeId, UUID salaryRecordId, String actorEmail, String eventType,
+    private AuditEvent(UUID employeeId, UUID salaryRecordId, UUID importBatchId, String actorEmail, String eventType,
             String reason, BigDecimal beforeAmount, String beforeCurrency, LocalDate beforeDate,
-            BigDecimal afterAmount, String afterCurrency, LocalDate afterDate, Instant createdAt) {
+            BigDecimal afterAmount, String afterCurrency, LocalDate afterDate, String source, Instant createdAt) {
         this.id = UUID.randomUUID();
         this.employeeId = employeeId;
         this.salaryRecordId = salaryRecordId;
+        this.importBatchId = importBatchId;
         this.actorEmail = actorEmail;
         this.eventType = eventType;
-        this.source = "MANUAL";
+        this.source = source;
         this.reason = reason;
         this.beforeAmount = beforeAmount;
         this.beforeCurrency = beforeCurrency;
@@ -63,14 +66,21 @@ public class AuditEvent {
     }
 
     public static AuditEvent salaryCreated(SalaryRecord record, String actorEmail, Instant now) {
-        return new AuditEvent(record.getEmployee().getId(), record.getId(), actorEmail, "SALARY_CREATED", null,
-                null, null, null, record.getAnnualBaseAmount(), record.getCurrencyCode(), record.getEffectiveDate(), now);
+        return new AuditEvent(record.getEmployee().getId(), record.getId(), null, actorEmail, "SALARY_CREATED", null,
+                null, null, null, record.getAnnualBaseAmount(), record.getCurrencyCode(), record.getEffectiveDate(),
+                "MANUAL", now);
+    }
+
+    public static AuditEvent csvSalaryCreated(SalaryRecord record, String actorEmail, UUID batchId, Instant now) {
+        return new AuditEvent(record.getEmployee().getId(), record.getId(), batchId, actorEmail, "SALARY_CREATED", null,
+                null, null, null, record.getAnnualBaseAmount(), record.getCurrencyCode(), record.getEffectiveDate(),
+                "CSV_IMPORT", now);
     }
 
     public static AuditEvent salaryCorrected(SalaryRecord record, String actorEmail, String reason,
             BigDecimal beforeAmount, String beforeCurrency, LocalDate beforeDate, Instant now) {
-        return new AuditEvent(record.getEmployee().getId(), record.getId(), actorEmail, "SALARY_CORRECTED", reason,
+        return new AuditEvent(record.getEmployee().getId(), record.getId(), null, actorEmail, "SALARY_CORRECTED", reason,
                 beforeAmount, beforeCurrency, beforeDate, record.getAnnualBaseAmount(), record.getCurrencyCode(),
-                record.getEffectiveDate(), now);
+                record.getEffectiveDate(), "MANUAL", now);
     }
 }

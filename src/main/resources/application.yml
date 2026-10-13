@@ -1,6 +1,10 @@
 spring:
   application:
     name: salary-management
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 11MB
   datasource:
     url: ${DATABASE_URL}
     username: ${DATABASE_USERNAME}

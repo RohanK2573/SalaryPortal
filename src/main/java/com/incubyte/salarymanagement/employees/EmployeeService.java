@@ -110,7 +110,8 @@ public class EmployeeService {
         }
         if (patch.size() < 2) throw ApiException.invalid("body", "At least one profile field is required.");
 
-        Employee employee = findEmployee(id);
+        Employee employee = employees.findLockedById(id)
+                .orElseThrow(() -> ApiException.notFound("Employee was not found."));
         if (employee.getVersion() != versionNode.longValue()) {
             throw ApiException.conflict("The employee changed since it was loaded. Refresh and retry.");
         }
