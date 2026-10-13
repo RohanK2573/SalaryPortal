@@ -1,0 +1,11 @@
+.git
+.idea
+.env
+.env.*
+application-local.properties
+target
+node_modules
+dist
+.next
+*.docx
+*.log
