@@ -1,0 +1,19 @@
+# Java build output
+target/
+build/
+.gradle/
+
+# JavaScript build output
+node_modules/
+dist/
+.next/
+
+# Local secrets and environment files
+.env
+.env.*
+!.env.example
+
+# Local tooling and operating system files
+.idea/
+.DS_Store
+*.log
