@@ -38,3 +38,6 @@
 - Implemented the employee directory with server-side search, filters, sorting, URL-backed pagination, responsive table/cards, and loading/error/empty states. Added employee creation, profile editing with version conflict recovery, current salary display, paginated salary history, salary creation, and audited salary corrections.
 - Added exact decimal/date validation, backend field-error mapping, duplicate/conflict guidance, draft-preserving refresh flows, and responsive accessible employee forms and dialogs. Wired employee routes into the authenticated application shell.
 - Verified the frontend with `npm run typecheck` and `npm run build`.
+- Approved Spec-09 and started the currency-separated compensation reporting UI.
+- Implemented country, country/job-title, and expandable department salary reports using backend aggregates. Added URL-backed view and filters, per-currency summary cards and tables, exact decimal formatting, active/current-salary scope guidance, and responsive loading, error, empty, and updating states.
+- Wired the reports route into the authenticated shell and verified the frontend with `npm run typecheck` and `npm run build`.

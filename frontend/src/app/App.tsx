@@ -9,6 +9,7 @@ import { useAuth } from '../auth/AuthProvider'
 import { EmployeeDirectoryPage } from '../employees/EmployeeDirectoryPage'
 import { EmployeeFormPage } from '../employees/EmployeeFormPage'
 import { EmployeeDetailPage } from '../employees/EmployeeDetailPage'
+import { ReportsPage } from '../reports/ReportsPage'
 
 const signInSchema = z.object({
   email: z.string().trim().email('Enter a valid email address.').max(254),
@@ -151,7 +152,7 @@ export function App() {
       <Route path="employees" element={<EmployeeDirectoryPage />} />
       <Route path="employees/new" element={<EmployeeFormPage />} />
       <Route path="employees/:id" element={<EmployeeDetailPage />} />
-      <Route path="reports" element={<PlaceholderPage title="Compensation reports" description="Review current salary insights by country and job title." icon={BriefcaseBusiness} />} />
+      <Route path="reports" element={<ReportsPage />} />
       <Route path="imports" element={<PlaceholderPage title="Import employees" description="Preview a CSV file before applying its changes." icon={FileUp} />} />
       <Route path="imports/:id" element={<PlaceholderPage title="Import preview" description="Review proposed employee changes before commit." icon={FileUp} />} />
     </Route>
